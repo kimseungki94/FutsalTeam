@@ -4,6 +4,7 @@
   "description": "��#\u0000 \u0000F\u0000u\u0000t\u0000s\u0000a\u0000l\u0000T\u0000e\u0000a\u0000m\u0000\r\u0000 \u0000",
   "main": "main.js",
   "scripts": {
+    "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
