@@ -26,5 +26,5 @@ server.get('/',function(request,response){
     console.log(content);
     response.send(content);
 
-});
-server.listen(3000);
+})
+server.listen(process.env.PORT || 3000);
