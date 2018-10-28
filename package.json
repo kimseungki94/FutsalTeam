@@ -18,9 +18,15 @@
   },
   "homepage": "https://github.com/kimseungki94/FutsalTeam#readme",
   "dependencies": {
+    "body-parser": "^1.18.3",
+    "cookie-parser": "^1.4.3",
     "express": "^4.16.4"
   },
   "devDependencies": {
     "nodemon": "^1.18.4"
+  },
+  "engines": {
+    "node": "0.10.41",
+    "npm": "1.4.29"
   }
 }

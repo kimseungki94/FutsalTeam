@@ -1,5 +1,13 @@
+var fs = require('fs');
 var express = require('express');
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
 var server = express();
+server.use(bodyParser.urlencoded({extended: false}))
+server.use(cookieParser())
+
+
+
 function HtmlContent(){
     var content=
     `
