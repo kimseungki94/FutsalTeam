@@ -6,15 +6,17 @@ var server = express();
 server.use(bodyParser.urlencoded({extended: false}))
 server.use(cookieParser())
 
+var title = '';
+var desc = '';
 
-
-function HtmlContent(){
+function HtmlContent(title,desc){
     var content=
     `
     <DOCTYPE html>
     <html>
     <head>
     <title>조기축구모임</title>
+    ${title}
     <meta charset="utf-8" />
     </head>
     <body>
@@ -25,6 +27,7 @@ function HtmlContent(){
     "id="Button">조직도</button>
     <a href="/login"> 로그인</a></h1>
     <a href="/signup"> 회원가입 </a>
+    ${desc}
     
     </body>
     </html>
@@ -33,31 +36,61 @@ function HtmlContent(){
 }
 server.get('/',function(request,response){
     var content = '';
-    content = HtmlContent();
+    content = HtmlContent(title,desc);
     console.log("조기축구시작");
     response.send(content);
 
 });
 server.get('/history',function(request,response){
     var content = '';
-    content = HtmlContent();
+    content = HtmlContent(title,desc);
    
     response.send("개판이다");
 
 });
 server.get('/group',function(request,response){
     var content = '';
-    content = HtmlContent(); 
+    content = HtmlContent(title,desc); 
     response.send("말안할래");
 
 });
 server.get('/signup',function(request,response){
-    content = HtmlContent(); 
-    response.send("회원가입");
+    var title = '회원가입';
+    var desc = `
+    <form action="/create_process" method="post">
+    <p>
+    <input type="text" name="title" 
+    placeholder="title"></p>
+    <p>
+    <input name="desc"
+    placeholder="description"></input>
+    </p>
+    <p>
+    <input type="submit" value="회원가입">
+    </p>
+    </form>
+    `;
+    content = HtmlContent(title,desc); 
+    response.send(content);
 });
 server.get('/login',function(request,response){
-    content = HtmlContent();
-    response.send("로그인");
+    var title = '로그인';
+    var desc = `
+    <form action="/create_process" method="post">
+    <p>
+    <input type="text" name="title" 
+    placeholder="title"></p>
+    <p>
+    <input name="desc"
+    placeholder="description"></input>
+    </p>
+    <p>
+    <input type="submit" value="로그인">
+    </p>
+    </form>
+    `;
+    content = HtmlContent(title,desc);
+    response.send(content);
 });
 
 server.listen(process.env.PORT || 3000);
