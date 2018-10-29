@@ -18,11 +18,14 @@ function HtmlContent(){
     <meta charset="utf-8" />
     </head>
     <body>
-    <h1>안녕하세요 조기축구 모임입니다.</h1>
+    <h1><a href="/">안녕하세요 조기축구 모임입니다.</a></h1>
     <button onclick="location.href = 'history';
     "id="Button">역사</button>
     <button onclick="location.href = 'group';
     "id="Button">조직도</button>
+    <a href="/login"> 로그인</a></h1>
+    <a href="/signup"> 회원가입 </a>
+    
     </body>
     </html>
     `;
@@ -31,8 +34,32 @@ function HtmlContent(){
 server.get('/',function(request,response){
     var content = '';
     content = HtmlContent();
-    console.log(content);
+    console.log("조기축구시작");
     response.send(content);
 
-})
+});
+server.get('/history',function(request,response){
+    var content = '';
+    content = HtmlContent();
+   
+    response.send("개판이다");
+
+});
+server.get('/group',function(request,response){
+    var content = '';
+    content = HtmlContent(); 
+    response.send("말안할래");
+
+});
+server.get('/signup',function(request,response){
+    content = HtmlContent(); 
+    response.send("회원가입");
+
+});
+server.get('/login',function(request,response){
+    content = HtmlContent();
+    response.send("로그인");
+
+});
+
 server.listen(process.env.PORT || 3000);
