@@ -151,23 +151,37 @@ server.get('/group',function(request,response){
 
 });
 server.get('/signup',function(request,response){
-    var title = '회원가입';
-    var desc = `
-    <form action="/create_process" method="post">
-    <p>
-    <input type="text" name="title" 
-    placeholder="title"></p>
-    <p>
-    <input type="password" name="desc"
-    placeholder="description"></input>
-    </p>
-    <p>
-    <input type="submit" value="회원가입">
-    </p>
-    </form>
-    `;
-    content = HtmlContent(title,desc); 
-    response.send(content);
+    request.logout();
+
+    //destory기능을 쓰는게 불상사를 줄일수 있음..
+    // request.session.destroy(function(err){
+    //     response.redirect('/');
+    // });
+    //session 상태 저장 이상한 에러같은거 엄청뜨는거 방지
+    /* 생코형님들 말로는 destory를 할시 쿠키값으로 가지고 있는걸
+    request header에서 요청하기때문에 이상황이 벌어지는거라고함
+    따라서 변수를 지정한 email이나 password는 냅두고 변수만 없애고
+    만들면 된다고하는데 다음에 해볼게! */
+    request.session.save(function(){
+        var title = '회원가입';
+        var desc = `
+        <form action="/create_process" method="post">
+        <p>
+        <input type="text" name="title" 
+        placeholder="title"></p>
+        <p>
+        <input type="password" name="desc"
+        placeholder="description"></input>
+        </p>
+        <p>
+        <input type="submit" value="회원가입">
+        </p>
+        </form>
+        `;
+        content = HtmlContent(title,desc); 
+        response.send(content);
+    })
+    
 });
 
 
