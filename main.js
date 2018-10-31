@@ -4,11 +4,10 @@ const FileSync = require('lowdb/adapters/FileSync')
 const adapter = new FileSync('db.json')
 const db = low(adapter)
 var fs = require('fs');
-// var passport = require('passport')
-// ,LocalStrategy = require('passport-local');
 var express = require('express');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
+var flash = require('connect-flash');
 var session = require('express-session'); //세션 미들워어 설치
 var FileStore = require('session-file-store')(session); //세션 파일스토어 생성 이왕이면 DB에 넣자
 var server = express();
@@ -21,6 +20,8 @@ server.use(session({
  saveUninitialized: true,
  store:new FileStore()
 }));
+server.use(flash());
+var passport = require('./lib/passport')(server)
 var title = '';
 var desc = '';
 
@@ -43,7 +44,7 @@ var desc = '';
 //   .write()
 
   //홈페이지 구현
-function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a>'){
+function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a>',feedback){
     var content=
     `
     <DOCTYPE html>
@@ -75,7 +76,9 @@ function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a>'){
     return content;
 }
 function authIsOwner(request,response){
-    if(request.session.is_logined){
+    if(request.user){
+
+        //request.session.is_logined 기존
         return true;
     }else{
         return false;
@@ -84,20 +87,29 @@ function authIsOwner(request,response){
 function authStatusUI(request,response){
     var authStatusUI = '<a href="/login">로그인</a>'
     if(authIsOwner(request,response)){
-        authStatusUI = `${request.session.nickname} | <a href="/logout">logout</a>`
+        authStatusUI = `${request.user.nickname} | <a href="/logout">logout</a>`
+        //session일때는 request.session.nickname
     }
     return authStatusUI;
 }
 server.get('/',function(request,response){  
+    var fmsg = request.flash();
+    var feedback = ''
+    if(fmsg.success){
+        
+        feedback = fmsg.success[0];
+        
+    }
     var content = ''; 
-    console.log(request.session);
-    content = HtmlContent(title,desc,authStatusUI(request,response));
+    var successful_login = `<div style="color:blue;"> ${feedback} </div>`
+    console.log('/',request.user);
+    content = HtmlContent(title,desc,authStatusUI(request,response),feedback);
     if(request.session.num === undefined){
         request.session.num = 1;
     } else {
         request.session.num =  request.session.num + 1;
     }
-    response.send(content + `<br> Views : ${request.session.num}</br>`);
+    response.send(content + successful_login + `<br> Views : ${request.session.num}</br>`);
 
 });
 server.get('/create',function(request,response){
@@ -158,15 +170,18 @@ server.get('/signup',function(request,response){
     response.send(content);
 });
 
-var authData = {
-    email:'skkim0832@gmail.com',
-    password:'1111',
-    nickname:'seung'
-}
+
 
 server.get('/login',function(request,response){
     var title = '로그인';
+    var fmsg = request.flash();
+    var feedback = ''
+    if(fmsg.error){
+        feedback = fmsg.error[0];
+    }
+    
     var desc = `
+    <div style="color:red;">${feedback}</div>
     <form action="/login_process" method="post">
     <p>
     <input type="text" name="email" 
@@ -185,31 +200,53 @@ server.get('/login',function(request,response){
     response.send(content);
 });
 
-server.post('/login_process',function(request,response){
-    var post = request.body;
-    var email = post.email;
-    var password = post.password; 
+// server.post('/login_process',function(request,response){
+//     var post = request.body;
+//     var email = post.email;
+//     var password = post.password; 
 
-    if(email === authData.email && password === authData.password){
-        console.log("1345");
-        request.session.is_logined = true;
-        request.session.nickname = authData.nickname; 
-        //이거 못해서 3시간동안 뻘짓.....
-        request.session.save(function(){
-            response.redirect('/');
-        }); //
-        console.log(request.session);
+//     if(email === authData.email && password === authData.password){
+//         console.log("1345");
+//         request.session.is_logined = true;
+//         request.session.nickname = authData.nickname; 
+//         //이거 못해서 3시간동안 뻘짓.....
+//         request.session.save(function(){
+//             response.redirect('/');
+//         }); //
+//         console.log(request.session);
         
-    }else{
-        response.send('who')
-    }
-    // response.redirect('/');
+//     }else{
+//         response.send('who')
+//     }
+//     // response.redirect('/');
     
-});
+// });
+server.post('/login_process',
+  passport.authenticate('local', 
+  { 
+      successRedirect: '/',      //성공했을때 경로                       
+  failureRedirect: '/login',   //실패했을때 경로 
+  failureFlash: true, 
+  successFlash: true        //지금 실행이 안됨...               
+  }));
+
 server.get('/logout',function(request,response){
    
-    request.session.destroy(function(err){
+    
+
+    request.logout();
+
+    //destory기능을 쓰는게 불상사를 줄일수 있음..
+    // request.session.destroy(function(err){
+    //     response.redirect('/');
+    // });
+    //session 상태 저장 이상한 에러같은거 엄청뜨는거 방지
+    /* 생코형님들 말로는 destory를 할시 쿠키값으로 가지고 있는걸
+    request header에서 요청하기때문에 이상황이 벌어지는거라고함
+    따라서 변수를 지정한 email이나 password는 냅두고 변수만 없애고
+    만들면 된다고하는데 다음에 해볼게! */
+    request.session.save(function(){
         response.redirect('/');
-    });
+    })
 });
 server.listen(process.env.PORT || 3000);
