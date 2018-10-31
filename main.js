@@ -55,12 +55,15 @@ function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a>'){
     </head>
     <body>
     <h1><a href="/">안녕하세요 조기축구 모임입니다.</a></h1>
-    <button onclick="location.href = 'history';
+      ${authStatusUI} <a href="/signup"> 회원가입 </a> <br></br>
+      <br><button onclick="location.href = 'history';
     "id="Button">역사</button>
     <button onclick="location.href = 'group';
     "id="Button">조직도</button>
-    ${authStatusUI}
-    <a href="/signup"> 회원가입 </a>
+    <button onclick="location.href = 'create';
+    "id="Button">게시글작성</button>
+
+    </br>
     <br>
     ${title}
     </br>
@@ -85,12 +88,10 @@ function authStatusUI(request,response){
     }
     return authStatusUI;
 }
-server.get('/',function(request,response){
-    
+server.get('/',function(request,response){  
+    var content = ''; 
     console.log(request.session);
-    var content = '';
     content = HtmlContent(title,desc,authStatusUI(request,response));
-    console.log(request.session);
     if(request.session.num === undefined){
         request.session.num = 1;
     } else {
@@ -99,16 +100,41 @@ server.get('/',function(request,response){
     response.send(content + `<br> Views : ${request.session.num}</br>`);
 
 });
+server.get('/create',function(request,response){
+    if(authIsOwner(request,response)){
+        var title = '게시판 만들기';
+    var desc = `
+    <form action="/create_question" method="post">
+    <p>
+    <input type="text" name="title" 
+    placeholder="title"></p>
+    <p>
+    <textarea name="desc"
+    placeholder="description"></textarea>
+    </p>
+    <p>
+    <input type="submit" value="질문작성">
+    </p>
+    </form>
+    `;
+        var content = HtmlContent(title,desc,authStatusUI(request,response))
+        response.send(content);
+    }
+    else{
+        response.redirect('/');
+        return false;
+    }
+});
 server.get('/history',function(request,response){
     var content = '';
-    content = HtmlContent(title,desc);
+    content = HtmlContent(title,desc,authStatusUI(request,response));
    
     response.send(content + `<br>개판이다</br>`);
 
 });
 server.get('/group',function(request,response){
     var content = '';
-    content = HtmlContent(title,desc); 
+    content = HtmlContent(title,desc,authStatusUI(request,response)); 
     response.send(content + `<br>말안할래</br>`);
 
 });
@@ -165,13 +191,25 @@ server.post('/login_process',function(request,response){
     var password = post.password; 
 
     if(email === authData.email && password === authData.password){
+        console.log("1345");
         request.session.is_logined = true;
         request.session.nickname = authData.nickname; 
-        response.redirect('/');
+        //이거 못해서 3시간동안 뻘짓.....
+        request.session.save(function(){
+            response.redirect('/');
+        }); //
+        console.log(request.session);
+        
     }else{
         response.send('who')
     }
     // response.redirect('/');
     
+});
+server.get('/logout',function(request,response){
+   
+    request.session.destroy(function(err){
+        response.redirect('/');
+    });
 });
 server.listen(process.env.PORT || 3000);
