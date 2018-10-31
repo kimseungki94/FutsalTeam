@@ -1,0 +1,13 @@
+//플래시 예시
+// server.get('/flash', function(req, res){
+//     // Set a flash message by passing the key, followed by the value, to req.flash().
+//     req.flash('info', 'HAHA!!');
+//     res.send('flash');
+//   });
+  
+//   server.get('/flash-display', function(req, res){
+//       var fmsg = req.flash();
+//       console.log(fmsg);
+//       res.send(fmsg);
+//     // Get an array of flash messages by passing the key to req.flash()
+//   });
