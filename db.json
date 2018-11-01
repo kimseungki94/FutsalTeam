@@ -1,8 +1,16 @@
 {
-  "topic": [],
-  "author": {},
-  "user": {
-    "name": "typicode"
-  },
-  "count": 138
+  "users": [
+    {
+      "id": "eef439",
+      "email": "skkim0832@gmail.com",
+      "password": "1111",
+      "displayName": "seung"
+    },
+    {
+      "id": "7f361a",
+      "email": "skkim0832@gmail.com",
+      "password": "1111",
+      "displayName": "seung"
+    }
+  ]
 }

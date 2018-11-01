@@ -1,8 +1,3 @@
-const low = require('lowdb')
-const FileSync = require('lowdb/adapters/FileSync')
-
-const adapter = new FileSync('db.json')
-const db = low(adapter)
 var fs = require('fs');
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -11,6 +6,8 @@ var flash = require('connect-flash');
 var session = require('express-session'); //세션 미들워어 설치
 var FileStore = require('session-file-store')(session); //세션 파일스토어 생성 이왕이면 DB에 넣자
 var server = express();
+var shortid = require('short-id');
+
 server.use(bodyParser.urlencoded({extended: false}))
 server.use(cookieParser())
 
@@ -21,6 +18,7 @@ server.use(session({
  store:new FileStore()
 }));
 server.use(flash());
+var db = require('./lib/db');
 var passport = require('./lib/passport')(server)
 var title = '';
 var desc = '';
@@ -44,7 +42,7 @@ var desc = '';
 //   .write()
 
   //홈페이지 구현
-function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a>',feedback){
+function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a> | | <a href="/register">Register</a>',feedback){
     var content=
     `
     <DOCTYPE html>
@@ -85,9 +83,9 @@ function authIsOwner(request,response){
     }
 }
 function authStatusUI(request,response){
-    var authStatusUI = '<a href="/login">로그인</a>'
+    var authStatusUI = '<a href="/login">로그인</a> | <a href="/register">Register</a>'  
     if(authIsOwner(request,response)){
-        authStatusUI = `${request.user.nickname} | <a href="/logout">logout</a>`
+        authStatusUI = `${request.user.displayName} | <a href="/logout">logout</a>`
         //session일때는 request.session.nickname
     }
     return authStatusUI;
@@ -97,6 +95,7 @@ server.get('/',function(request,response){
     var feedback = ''
     if(fmsg.success){
         
+
         feedback = fmsg.success[0];
         
     }
@@ -150,40 +149,99 @@ server.get('/group',function(request,response){
     response.send(content + `<br>말안할래</br>`);
 
 });
-server.get('/signup',function(request,response){
-    request.logout();
+// server.get('/signup',function(request,response){
+//     request.logout();
 
-    //destory기능을 쓰는게 불상사를 줄일수 있음..
-    // request.session.destroy(function(err){
-    //     response.redirect('/');
-    // });
-    //session 상태 저장 이상한 에러같은거 엄청뜨는거 방지
-    /* 생코형님들 말로는 destory를 할시 쿠키값으로 가지고 있는걸
-    request header에서 요청하기때문에 이상황이 벌어지는거라고함
-    따라서 변수를 지정한 email이나 password는 냅두고 변수만 없애고
-    만들면 된다고하는데 다음에 해볼게! */
-    request.session.save(function(){
-        var title = '회원가입';
-        var desc = `
-        <form action="/create_process" method="post">
-        <p>
-        <input type="text" name="title" 
-        placeholder="title"></p>
-        <p>
-        <input type="password" name="desc"
-        placeholder="description"></input>
-        </p>
-        <p>
-        <input type="submit" value="회원가입">
-        </p>
-        </form>
-        `;
-        content = HtmlContent(title,desc); 
-        response.send(content);
-    })
+//     //destory기능을 쓰는게 불상사를 줄일수 있음..
+//     // request.session.destroy(function(err){
+//     //     response.redirect('/');
+//     // });
+//     //session 상태 저장 이상한 에러같은거 엄청뜨는거 방지
+//     /* 생코형님들 말로는 destory를 할시 쿠키값으로 가지고 있는걸
+//     request header에서 요청하기때문에 이상황이 벌어지는거라고함
+//     따라서 변수를 지정한 email이나 password는 냅두고 변수만 없애고
+//     만들면 된다고하는데 다음에 해볼게! */
+//     request.session.save(function(){
+//         var title = '회원가입';
+//         var desc = `
+//         <form action="/create_process" method="post">
+//         <p>
+//         <input type="text" name="title" 
+//         placeholder="title"></p>
+//         <p>
+//         <input type="password" name="desc"
+//         placeholder="description"></input>
+//         </p>
+//         <p>
+//         <input type="submit" value="회원가입">
+//         </p>
+//         </form>
+//         `;
+//         content = HtmlContent(title,desc); 
+//         response.send(content);
+//     })
     
+// });
+server.get('/register',function(request,response){
+    var title = '로그인';
+    var fmsg = request.flash();
+    var feedback = ''
+    if(fmsg.error){
+        feedback = fmsg.error[0];
+    }
+    
+    var desc = `
+    <div style="color:red;">${feedback}</div>
+    <form action="/register_process" method="post">
+    <p>
+    <input type="text" name="email" 
+    placeholder="email"></p>
+    <p>
+    <input type="password" name="password"
+    placeholder="password"></input>
+    </p>
+    <p>
+    <input type="password" name="password2"
+    placeholder="password"></input>
+    </p>
+    <p>
+    <input type="text" name="displayName" 
+    placeholder="displayName"></p>
+    <p>
+    <input type="submit" value="회원가입">
+    </p>
+    </form>
+    `;
+
+    content = HtmlContent(title,desc);
+    response.send(content);
 });
 
+server.post('/register_process', function(request,response){
+    var post = request.body;
+    var email = post.email;
+    var pwd = post.password;
+    var pwd2 = post.password2;
+    var displayName = post.displayName;
+
+    if(pwd != pwd2){
+        request.flash('errpr', 'Password must same!');
+        response.redirect('/auth/register');
+    }else{
+        var user={
+            id:shortid.generate(),
+            email:email,
+            password:pwd,
+            displayName:displayName
+        };
+        db.get('users').push(user).write();
+            request.login(user, function(err){
+                console.log('등록은됫다');
+                return response.redirect('/'); 
+            })
+       
+        }
+    });
 
 
 server.get('/login',function(request,response){
