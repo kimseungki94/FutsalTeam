@@ -7,7 +7,8 @@ var session = require('express-session'); //세션 미들워어 설치
 var FileStore = require('session-file-store')(session); //세션 파일스토어 생성 이왕이면 DB에 넣자
 var server = express();
 var shortid = require('short-id');
-
+var sanitizeHtml = require('sanitize-html');
+var db = require('./lib/db');
 server.use(bodyParser.urlencoded({extended: false}))
 server.use(cookieParser())
 
@@ -23,23 +24,7 @@ var passport = require('./lib/passport')(server)
 var title = '';
 var desc = '';
 
-// //low db 사용
-// // Set some defaults (required if your JSON file is empty)
-// db.defaults({ topic: [], author: {}})
-//   .write()
 
-// // Add a post
-// db.get('posts')
-//   .push({ id: 1, title: 'lowdb is awesome'})
-//   .write()
-
-// // Set a user using Lodash shorthand syntax
-// db.set('user.name', 'typicode')
-//   .write()
-  
-// // Increment count
-// db.update('count', n => n + 1)
-//   .write()
 
   //홈페이지 구현
 function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a> | | <a href="/register">Register</a>',feedback){
@@ -111,6 +96,7 @@ server.get('/',function(request,response){
     response.send(content + successful_login + `<br> Views : ${request.session.num}</br>`);
 
 });
+
 server.get('/create',function(request,response){
     if(authIsOwner(request,response)){
         var title = '게시판 만들기';
@@ -120,7 +106,7 @@ server.get('/create',function(request,response){
     <input type="text" name="title" 
     placeholder="title"></p>
     <p>
-    <textarea name="desc"
+    <textarea name="description"
     placeholder="description"></textarea>
     </p>
     <p>
@@ -135,6 +121,43 @@ server.get('/create',function(request,response){
         response.redirect('/');
         return false;
     }
+});
+server.post('/create_question', function(request,response){
+    if(!authIsOwner(request,response)){
+        response.redirect('/');
+        return false;
+
+    }
+    var post = request.body;
+    var title = post.title;
+    var description = post.description;
+    var id = shortid.generate();
+    db.get('topics').push({
+        id:id,
+        title:title,
+        description:description,
+        user_id:request.user.id
+    }).write();
+    response.redirect(`/topic/${id}`)
+})
+server.get('/topic/:pageId', function(request,response,next){
+    var topic = db.get('topics').find({
+        id:request.params.pageId,
+       
+    }).value();
+
+    //쓰는방법을 모르겠음 undefine뜨고 담에 확인하자..
+    // var  description=request.params.description
+    // var sanitizedTitle = sanitizeHtml(topic,title);
+    // var sanitizedDescription = sanitizeHtml(topic,description,{
+    //     allowedTags: ['h1']
+    // });
+    var content = `지은사람 | ${request.user.displayName} 주제 ${topic.title} |
+    내용 ${topic.description}`;
+
+    // var filteredId = path.parse(request.params.pageId).base;
+    // fs.readFile(`data/`)
+    response.send(content);
 });
 server.get('/history',function(request,response){
     var content = '';
@@ -296,7 +319,7 @@ server.get('/login',function(request,response){
 server.post('/login_process',
   passport.authenticate('local', 
   { 
-      successRedirect: '/',      //성공했을때 경로                       
+  successRedirect: '/',      //성공했을때 경로                       
   failureRedirect: '/login',   //실패했을때 경로 
   failureFlash: true, 
   successFlash: true        //지금 실행이 안됨...               
