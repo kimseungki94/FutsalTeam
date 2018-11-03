@@ -57,8 +57,10 @@ function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a> | 
     "id="Button">조직도</button>
     <button onclick="location.href = 'create';
     "id="Button">게시글작성</button>
-    <button onclick="location.href = 'edit';
+    <button onclick="location.href = 'update';
     "id="Button">게시글수정</button>
+    <button onclick="location.href = 'delete';
+    "id="Button">게시글삭제</button>
 
     <br>
     ${listText}
@@ -130,9 +132,11 @@ server.get('/create',function(request,response){
         var title = '게시판 만들기';
     var desc = `
     <form action="/create_question" method="post">
+    <h5> 제목 </h5>
     <p>
     <input type="text" name="title" 
     placeholder="title"></p>
+    <h5> 설명 </h5>
     <p>
     <textarea name="description"
     placeholder="description"></textarea>
@@ -142,7 +146,6 @@ server.get('/create',function(request,response){
     </p>
     </form>
     `;
-    console.log(textlist());
         var content = HtmlContent(title,desc,authStatusUI(request,response),textlist());
         response.send(content);
     }
@@ -167,7 +170,8 @@ server.post('/create_question', function(request,response){
         description:description,
         user_id:request.user.id
     }).write();
-    response.redirect(`/topic/${id}`)
+    // response.redirect(`/topic/${id}`)
+    response.redirect('/');
 })
 server.get('/topic/:pageId', function(request,response,next){
     var topic = db.get('topics').find({
@@ -377,9 +381,65 @@ server.get('/logout',function(request,response){
         response.redirect('/');
     })
 });
-server.get('/edit',function(request,response){
-    var topic = db.get('topics').find({id:request.params.pageId}).value();
-    console.log(topic);
-    response.send("ww")
+server.get('/update',function(request,response){
+    var topic = db.get('topics').find({user_id:request.user.id}).value();
+    if(authIsOwner(request,response)){
+    var title = '게시판 수정';
+    var desc = `
+    <form action="/update_process" method="post">
+    <p>
+    <h5> 제목 </h5>
+    <input type="text" name="title" 
+    placeholder="${topic.title}"></p>
+    <p>
+    <h5> 설명 </h5>
+    <textarea name="description"
+    placeholder="${topic.description}"></textarea>
+    </p>
+    <p>
+    <input type="submit" value="수정">
+    </p>
+    </form>
+    `;
+        var content = HtmlContent(title,desc,authStatusUI(request,response),textlist());
+        response.send(content);
+    }
+    else{
+        response.redirect('/');
+        return false;
+    }
 });
+server.post('/update_process',function(request,response){
+    var post = request.body;
+    
+    var title = post.title;
+    var description = post.description;
+
+    var topic = db.get('topics').find({user_id:request.user.id}).value();
+    console.log(post);
+    console.log("ㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗㅗ");
+    console.log(topic)
+    db.get('topics').find({user_id:request.user.id}).assign({
+        title:title, description:description
+    }).write();
+    // if(authIsOwner(request,response)){
+   
+    // }
+    // else{
+    //     response.redirect('/');
+    //     return false;
+    // }
+    response.redirect('/');
+});
+server.get('/delete',function(request,response){
+    if(!authIsOwner(request,response)){
+        response.redirect('/');
+        return false;
+    }
+    db.get('topics').remove({
+        user_id:request.user.id
+    }).write();
+    response.redirect('/');
+
+})
 server.listen(process.env.PORT || 3000);
