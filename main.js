@@ -24,10 +24,21 @@ var passport = require('./lib/passport')(server)
 var title = '';
 var desc = '';
 
-
+var list = db.get('topics').value();
+function textlist(request,response,next){
+        var i=0;
+        var listText = '';
+        
+        while(i <list.length){
+            listText = listText + `<li><a href="/topic/${list[i].id}">${list[i].title}</a></li>`;
+            i = i + 1;
+            
+        }
+        return listText;
+    }
 
   //홈페이지 구현
-function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a> | | <a href="/register">Register</a>',feedback){
+function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a> | | <a href="/register">Register</a>',listText){
     var content=
     `
     <DOCTYPE html>
@@ -46,7 +57,11 @@ function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a> | 
     "id="Button">조직도</button>
     <button onclick="location.href = 'create';
     "id="Button">게시글작성</button>
+    <button onclick="location.href = 'edit';
+    "id="Button">게시글수정</button>
 
+    <br>
+    ${listText}
     </br>
     <br>
     ${title}
@@ -75,9 +90,19 @@ function authStatusUI(request,response){
     }
     return authStatusUI;
 }
+
+// server.get('*',function(request,response,next){  
+   
+//     var content = ''; 
+//     content = HtmlContent(textlist());
+   
+//     return next();
+
+// });
 server.get('/',function(request,response){  
     var fmsg = request.flash();
     var feedback = ''
+    
     if(fmsg.success){
         
 
@@ -86,18 +111,21 @@ server.get('/',function(request,response){
     }
     var content = ''; 
     var successful_login = `<div style="color:blue;"> ${feedback} </div>`
+
     console.log('/',request.user);
-    content = HtmlContent(title,desc,authStatusUI(request,response),feedback);
+    content = HtmlContent(title,desc,authStatusUI(request,response),textlist());
     if(request.session.num === undefined){
         request.session.num = 1;
     } else {
         request.session.num =  request.session.num + 1;
     }
-    response.send(content + successful_login + `<br> Views : ${request.session.num}</br>`);
+    response.send(content + successful_login);
 
 });
 
+
 server.get('/create',function(request,response){
+    
     if(authIsOwner(request,response)){
         var title = '게시판 만들기';
     var desc = `
@@ -114,7 +142,8 @@ server.get('/create',function(request,response){
     </p>
     </form>
     `;
-        var content = HtmlContent(title,desc,authStatusUI(request,response))
+    console.log(textlist());
+        var content = HtmlContent(title,desc,authStatusUI(request,response),textlist());
         response.send(content);
     }
     else{
@@ -143,8 +172,11 @@ server.post('/create_question', function(request,response){
 server.get('/topic/:pageId', function(request,response,next){
     var topic = db.get('topics').find({
         id:request.params.pageId,
-       
     }).value();
+    var user = db.get('users').find({
+        id:topic.user_id
+    }).value();
+
 
     //쓰는방법을 모르겠음 undefine뜨고 담에 확인하자..
     // var  description=request.params.description
@@ -152,7 +184,8 @@ server.get('/topic/:pageId', function(request,response,next){
     // var sanitizedDescription = sanitizeHtml(topic,description,{
     //     allowedTags: ['h1']
     // });
-    var content = `지은사람 | ${request.user.displayName} 주제 ${topic.title} |
+   
+    var content = `지은사람 | ${user.displayName} 주제 ${topic.title} |
     내용 ${topic.description}`;
 
     // var filteredId = path.parse(request.params.pageId).base;
@@ -161,14 +194,14 @@ server.get('/topic/:pageId', function(request,response,next){
 });
 server.get('/history',function(request,response){
     var content = '';
-    content = HtmlContent(title,desc,authStatusUI(request,response));
+    content = HtmlContent(title,desc,authStatusUI(request,response),textlist());
    
     response.send(content + `<br>개판이다</br>`);
 
 });
 server.get('/group',function(request,response){
     var content = '';
-    content = HtmlContent(title,desc,authStatusUI(request,response)); 
+    content = HtmlContent(title,desc,authStatusUI(request,response),textlist()); 
     response.send(content + `<br>말안할래</br>`);
 
 });
@@ -236,7 +269,7 @@ server.get('/register',function(request,response){
     </form>
     `;
 
-    content = HtmlContent(title,desc);
+    content =  HtmlContent(title,desc,authStatusUI(request,response),textlist());
     response.send(content);
 });
 
@@ -291,7 +324,7 @@ server.get('/login',function(request,response){
     </form>
     `;
 
-    content = HtmlContent(title,desc);
+    content = HtmlContent(title,desc,authStatusUI(request,response),textlist());
     response.send(content);
 });
 
@@ -343,5 +376,10 @@ server.get('/logout',function(request,response){
     request.session.save(function(){
         response.redirect('/');
     })
+});
+server.get('/edit',function(request,response){
+    var topic = db.get('topics').find({id:request.params.pageId}).value();
+    console.log(topic);
+    response.send("ww")
 });
 server.listen(process.env.PORT || 3000);
