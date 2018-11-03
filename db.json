@@ -1,42 +1,30 @@
 {
   "users": [
     {
-      "id": "e64956",
+      "id": "9ee239",
       "email": "skkim0832@gmail.com",
-      "password": "1111",
+      "password": "$2b$10$1ANuNhWhUPxVlC6L2XNAO.xRVCkAIeEli5s8HwPO/zSJA9Tjy6PHm",
       "displayName": "seung"
     },
     {
-      "id": "7d1f50",
-      "email": "1111",
-      "password": "1",
-      "displayName": "1234"
+      "id": "7bc9f1",
+      "email": "skkim0832@naver.com",
+      "password": "$2b$10$3GH/7uM11z1VY3heVTOchuhMndxdA9lnquBuxwV/flnJKGa.RZyXe",
+      "displayName": "kimsk0832"
     }
   ],
   "topics": [
     {
-      "id": "d263fb",
-      "title": "aaa",
-      "description": "dddd",
-      "user_id": "e64956"
+      "id": "f4dd57",
+      "title": "풋살구함",
+      "description": "수원월드컵경기장에서구해요!",
+      "user_id": "7bc9f1"
     },
     {
-      "id": "bbef9d",
-      "title": "jjjj",
-      "description": "yyyy",
-      "user_id": "e64956"
-    },
-    {
-      "id": "762980",
-      "title": "풋살",
-      "description": "개판그자체",
-      "user_id": "e64956"
-    },
-    {
-      "id": "3def24",
+      "id": "e28ef4",
       "title": "풋살 4명 구해요",
-      "description": "풋살하러가즈아~",
-      "user_id": "7d1f50"
+      "description": "선착순입니다~",
+      "user_id": "9ee239"
     }
   ]
 }

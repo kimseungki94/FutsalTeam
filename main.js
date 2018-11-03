@@ -9,6 +9,7 @@ var server = express();
 var shortid = require('short-id');
 var sanitizeHtml = require('sanitize-html');
 var db = require('./lib/db');
+var bcrypt= require('bcrypt');
 server.use(bodyParser.urlencoded({extended: false}))
 server.use(cookieParser())
 
@@ -50,7 +51,7 @@ function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a> | 
     </head>
     <body>
     <h1><a href="/">안녕하세요 조기축구 모임입니다.</a></h1>
-      ${authStatusUI} <a href="/signup"> 회원가입 </a> <br></br>
+      ${authStatusUI} <br></br>
       <br><button onclick="location.href = 'history';
     "id="Button">역사</button>
     <button onclick="location.href = 'group';
@@ -85,9 +86,9 @@ function authIsOwner(request,response){
     }
 }
 function authStatusUI(request,response){
-    var authStatusUI = '<a href="/login">로그인</a> | <a href="/register">Register</a>'  
+    var authStatusUI = '<a href="/login">로그인</a> | <a href="/register">회원가입</a>'  
     if(authIsOwner(request,response)){
-        authStatusUI = `${request.user.displayName} | <a href="/logout">logout</a>`
+        authStatusUI = `${request.user.displayName} | <a href="/logout">로그아웃</a>`
         //session일때는 request.session.nickname
     }
     return authStatusUI;
@@ -243,7 +244,7 @@ server.get('/group',function(request,response){
     
 // });
 server.get('/register',function(request,response){
-    var title = '로그인';
+    var title = '회원가입';
     var fmsg = request.flash();
     var feedback = ''
     if(fmsg.error){
@@ -288,18 +289,21 @@ server.post('/register_process', function(request,response){
         request.flash('errpr', 'Password must same!');
         response.redirect('/auth/register');
     }else{
-        var user={
-            id:shortid.generate(),
-            email:email,
-            password:pwd,
-            displayName:displayName
-        };
-        db.get('users').push(user).write();
-            request.login(user, function(err){
-                console.log('등록은됫다');
-                return response.redirect('/'); 
-            })
-       
+        bcrypt.hash(pwd, 10, function(err, hash) {
+            // Store hash in your password DB.
+            var user={
+                id:shortid.generate(),
+                email:email,
+                password:hash,
+                displayName:displayName
+            };
+            db.get('users').push(user).write();
+                request.login(user, function(err){
+                    console.log('등록은됫다');
+                    return response.redirect('/'); 
+                })      
+        });
+        
         }
     });
 
@@ -382,8 +386,9 @@ server.get('/logout',function(request,response){
     })
 });
 server.get('/update',function(request,response){
-    var topic = db.get('topics').find({user_id:request.user.id}).value();
+    
     if(authIsOwner(request,response)){
+    var topic = db.get('topics').find({user_id:request.user.id}).value();
     var title = '게시판 수정';
     var desc = `
     <form action="/update_process" method="post">
