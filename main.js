@@ -299,7 +299,6 @@ server.post('/register_process', function(request,response){
             };
             db.get('users').push(user).write();
                 request.login(user, function(err){
-                    console.log('등록은됫다');
                     return response.redirect('/'); 
                 })      
         });
