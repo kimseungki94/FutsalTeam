@@ -51,7 +51,8 @@ function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a> | 
     </head>
     <body>
     <h1><a href="/">안녕하세요 조기축구 모임입니다.</a></h1>
-      ${authStatusUI} <br></br>
+      ${authStatusUI}  <br><button onclick="location.href = 'google';
+      "id="Button">구글로그인</button><br></br>
       <br><button onclick="location.href = 'history';
     "id="Button">역사</button>
     <button onclick="location.href = 'group';
