@@ -68,6 +68,8 @@ function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a> | 
     "id="Button">게시글삭제</button>
     <button onclick="location.href = 'schedule';
     "id="Button">일정확인</button>
+    <button onclick="location.href = 'customer';
+    "id="Button">고객문의</button>
 
     <br>
     ${listText}
