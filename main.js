@@ -94,7 +94,9 @@ function authIsOwner(request,response){
     }
 }
 function authStatusUI(request,response){
-    var authStatusUI = '<a href="/login">로그인</a> | <a href="/register">회원가입</a>'  
+    var authStatusUI = `<a href="/login">로그인</a> | 
+    <a href="/register">회원가입</a> |
+    <a href="/auth/google"> 구글로그인</a>`  
     if(authIsOwner(request,response)){
         authStatusUI = `${request.user.displayName} | <a href="/logout">로그아웃</a>`
         //session일때는 request.session.nickname
@@ -134,7 +136,19 @@ server.get('/',function(request,response){
 
 });
 
+// server.get('/auth/google',
 
+// passport.authenticate('google', {
+//     scope: ['https://www.googleapis.com/auth/plus.login']
+   
+// }));
+// server.get('/auth/google/callback', 
+//   passport.authenticate('google', 
+//   { failureRedirect: '/login' }),
+//   function(req, res) {
+//     res.redirect('/');
+//   });
+//   console.log("1aa");
 server.get('/create',function(request,response){
     
     if(authIsOwner(request,response)){
@@ -372,6 +386,18 @@ server.post('/login_process',
   failureFlash: true, 
   successFlash: true        //지금 실행이 안됨...               
   }));
+
+// server.get('/auth/google',
+// passport.authenticate('google', {
+//        scope: ['https://www.googleapis.com/auth/plus.login'] 
+// }));
+// server.get('/auth/google/callback', 
+//   passport.authenticate('google', 
+//   { failureRedirect: '/login' }),
+//   function(req, res) {
+//     res.redirect('/');
+//   });
+ 
 
 server.get('/logout',function(request,response){
    
