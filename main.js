@@ -26,6 +26,7 @@ var title = '';
 var desc = '';
 
 var list = db.get('topics').value();
+
 function textlist(request,response,next){
         var i=0;
         var listText = '';
@@ -51,10 +52,11 @@ function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a> | 
     </head>
     <body>
     <h1><a href="/">안녕하세요 조기축구 모임입니다.</a></h1>
-      ${authStatusUI}  <br><button onclick="location.href = 'google';
-      "id="Button">구글로그인</button>
-      <button onclick="location.href = 'facebook';
-      "id="Button">facebook로그인</button>
+      ${authStatusUI}  <br>
+     
+
+      
+
       <br></br>
       <br><button onclick="location.href = 'history';
     "id="Button">역사</button>
@@ -96,7 +98,9 @@ function authIsOwner(request,response){
 function authStatusUI(request,response){
     var authStatusUI = `<a href="/login">로그인</a> | 
     <a href="/register">회원가입</a> |
-    <a href="/auth/google"> 구글로그인</a>`  
+    <a href="/auth/google"> 구글로그인</a> | 
+    <a href="/auth/facebook"> 페이스북로그인</a>
+    `  
     if(authIsOwner(request,response)){
         authStatusUI = `${request.user.displayName} | <a href="/logout">로그아웃</a>`
         //session일때는 request.session.nickname
