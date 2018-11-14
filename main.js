@@ -47,18 +47,16 @@ function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a> | 
     <html>
     <head>
     <title>조기축구모임</title>
-   
+    <link rel = "stylesheet"
+    href="index.css"/>
     <meta charset="utf-8" />
     </head>
     <body>
     <h1><a href="/">안녕하세요 조기축구 모임입니다.</a></h1>
       ${authStatusUI}  <br>
-     
-
-      
 
       <br></br>
-      <br><button onclick="location.href = 'history';
+      <br><button onclick="location.href = '/routes/history';
     "id="Button">역사</button>
     <button onclick="location.href = 'group';
     "id="Button">조직도</button>
@@ -223,13 +221,16 @@ server.get('/topic/:pageId', function(request,response,next){
     // fs.readFile(`data/`)
     response.send(content);
 });
-server.get('/history',function(request,response){
-    var content = '';
-    content = HtmlContent(title,desc,authStatusUI(request,response),textlist());
+var history = require('./routes/history');
+console.log("1818")
+server.use('/history',history);
+// server.get('/history',function(request,response){
+//     var content = '';
+//     content = HtmlContent(title,desc,authStatusUI(request,response),textlist());
    
-    response.send(content + `<br>개판이다</br>`);
+//     response.send(content + `<br>개판이다</br>`);
 
-});
+// });
 server.get('/group',function(request,response){
     var content = '';
     content = HtmlContent(title,desc,authStatusUI(request,response),textlist()); 
