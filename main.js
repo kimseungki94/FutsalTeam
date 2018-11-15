@@ -56,7 +56,7 @@ function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a> | 
       ${authStatusUI}  <br>
 
       <br></br>
-      <br><button onclick="location.href = '/routes/history';
+      <br><button onclick="location.href = 'routes/history';
     "id="Button">역사</button>
     <button onclick="location.href = 'group';
     "id="Button">조직도</button>
@@ -222,7 +222,7 @@ server.get('/topic/:pageId', function(request,response,next){
     response.send(content);
 });
 var history = require('./routes/history');
-console.log("1818")
+
 server.use('/history',history);
 // server.get('/history',function(request,response){
 //     var content = '';
@@ -485,4 +485,5 @@ server.get('/delete',function(request,response){
     response.redirect('/');
 
 })
+
 server.listen(process.env.PORT || 3000);
