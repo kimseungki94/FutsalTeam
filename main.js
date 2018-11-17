@@ -12,6 +12,9 @@ var db = require('./lib/db');
 var bcrypt= require('bcrypt');
 server.use(bodyParser.urlencoded({extended: false}))
 server.use(cookieParser())
+server.set('view engine', 'html');
+server.engine('html', require('ejs').renderFile);
+server.set('views', __dirname + '/view');
 
 server.use(session({
  secret: '@#@$MYSIGN#@$#$',
@@ -56,7 +59,7 @@ function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a> | 
       ${authStatusUI}  <br>
 
       <br></br>
-      <br><button onclick="location.href = 'routes/history';
+      <br><button onclick="location.href = 'routes/history/';
     "id="Button">역사</button>
     <button onclick="location.href = 'group';
     "id="Button">조직도</button>
@@ -221,9 +224,9 @@ server.get('/topic/:pageId', function(request,response,next){
     // fs.readFile(`data/`)
     response.send(content);
 });
-var history = require('./routes/history');
+var historyRouter = require('./routes/history');
 
-server.use('/history',history);
+server.use('/routes/history',historyRouter);
 // server.get('/history',function(request,response){
 //     var content = '';
 //     content = HtmlContent(title,desc,authStatusUI(request,response),textlist());
@@ -231,10 +234,15 @@ server.use('/history',history);
 //     response.send(content + `<br>개판이다</br>`);
 
 // });
+server.use(express.static('public'));
 server.get('/group',function(request,response){
-    var content = '';
-    content = HtmlContent(title,desc,authStatusUI(request,response),textlist()); 
-    response.send(content + `<br>말안할래</br>`);
+    // var content = '';
+    // content = HtmlContent(title,desc,authStatusUI(request,response),textlist()); 
+    // fs.readFile('./view/sample.html');
+    // response.writeHead(200, { 'content-Type': 'sample.html'});
+    response.render('sample.html',{result: true});
+   
+    
 
 });
 // server.get('/signup',function(request,response){
