@@ -234,8 +234,11 @@ server.use('/routes/history',historyRouter);
 //     response.send(content + `<br>개판이다</br>`);
 
 // });
+var path = require("path");
 server.use(express.static('public'));
-
+server.use(express.static('css'));
+server.use(express.static('function'));
+server.use(express.static(path.join(__dirname,"public")));
 var groupRouter = require('./routes/group');
 server.use('/routes/group',groupRouter);
 
