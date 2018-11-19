@@ -61,7 +61,7 @@ function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a> | 
       <br></br>
       <br><button onclick="location.href = 'routes/history/';
     "id="Button">역사</button>
-    <button onclick="location.href = 'group';
+    <button onclick="location.href = 'routes/group';
     "id="Button">조직도</button>
     <button onclick="location.href = 'create';
     "id="Button">게시글작성</button>
@@ -235,16 +235,21 @@ server.use('/routes/history',historyRouter);
 
 // });
 server.use(express.static('public'));
-server.get('/group',function(request,response){
-    // var content = '';
-    // content = HtmlContent(title,desc,authStatusUI(request,response),textlist()); 
-    // fs.readFile('./view/sample.html');
-    // response.writeHead(200, { 'content-Type': 'sample.html'});
-    response.render('sample.html',{result: true});
+
+var groupRouter = require('./routes/group');
+server.use('/routes/group',groupRouter);
+
+
+// server.get('/group',function(request,response){
+//     // var content = '';
+//     // content = HtmlContent(title,desc,authStatusUI(request,response),textlist()); 
+//     // fs.readFile('./view/sample.html');
+//     // response.writeHead(200, { 'content-Type': 'sample.html'});
+//     response.render('sample.html',{result: true});
    
     
 
-});
+// });
 // server.get('/signup',function(request,response){
 //     request.logout();
 
