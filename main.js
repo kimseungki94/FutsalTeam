@@ -51,7 +51,7 @@ function HtmlContent(title,desc,authStatusUI='<a href="/login"> 로그인</a> | 
     <head>
     <title>조기축구모임</title>
     <link rel = "stylesheet"
-    href="index.css"/>
+    href="/css/index.css"/>
     <meta charset="utf-8" />
     </head>
     <body>
@@ -234,11 +234,9 @@ server.use('/routes/history',historyRouter);
 //     response.send(content + `<br>개판이다</br>`);
 
 // });
-var path = require("path");
-server.use(express.static('public'));
-server.use(express.static('css'));
-server.use(express.static('function'));
-server.use(express.static(path.join(__dirname,"public")));
+var path = require('path');
+server.use(express.static('activate'));
+server.use(express.static(path.join(__dirname,'/')));
 var groupRouter = require('./routes/group');
 server.use('/routes/group',groupRouter);
 
