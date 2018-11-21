@@ -1,20 +1,5 @@
 
-
-const me = {
-
-    account: [
-        {
-    name : "kim",
-    age : "25",
-    gender:"Male",
-    Handsome: "true"
-        }
-    ],
-    hobby: [
-        {
-            some : "soccer"
-        }
-    ]
-}
-console.log(me);
+const title = document.getElementById("title");
+title.innerHTML = "조기축구 조직도"
+console.error("fuck");
 alert('Im ng');
